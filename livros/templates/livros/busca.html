@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+
+{% block titulo %}Buscar livros · Minha Estante{% endblock %}
+
+{% block conteudo %}
+  <h1>Buscar livros</h1>
+
+  {# GET: o termo vai na URL (/buscar/?q=...) e a view lê com request.GET #}
+  <form method="get" class="busca">
+    <input type="search" name="q" value="{{ termo }}" placeholder="Título, autor ou ISBN" autofocus>
+    <button type="submit" class="botao">Buscar</button>
+  </form>
+
+  {% if erro %}<p class="aviso aviso-error">{{ erro }}</p>{% endif %}
+
+  {% if termo and not erro %}
+    <p class="atribuicao">Resultados do Google Books para "{{ termo }}"</p>
+    <div class="resultados">
+      {% for livro in resultados %}
+        <div class="resultado">
+          {% if livro.capa_url %}
+            <img src="{{ livro.capa_url }}" alt="Capa de {{ livro.titulo }}" loading="lazy">
+          {% else %}
+            <span class="lombada">{{ livro.titulo }}</span>
+          {% endif %}
+          <div>
+            <strong>{{ livro.titulo }}</strong>
+            <p class="autor">{{ livro.autor|default:"Autor não informado" }}{% if livro.paginas %} · {{ livro.paginas }} p.{% endif %}</p>
+            {% if livro.google_id in na_estante %}
+              <span class="etiqueta">Já está na estante</span>
+            {% else %}
+              {# POST: salvar no banco muda dados, então usa POST com csrf_token #}
+              <form method="post" action="{% url 'adicionar' livro.google_id %}">
+                {% csrf_token %}
+                <button type="submit" class="botao">Adicionar à estante</button>
+              </form>
+            {% endif %}
+          </div>
+        </div>
+      {% empty %}
+        <p class="vazio">Nenhum livro encontrado.</p>
+      {% endfor %}
+    </div>
+  {% endif %}
+{% endblock %}

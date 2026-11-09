@@ -1,0 +1,47 @@
+{% load static %}<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block titulo %}Minha Estante{% endblock %}</title>
+  <link rel="stylesheet" href="{% static 'livros/estilo.css' %}">
+  <script>
+    // Aplica o tema salvo antes de desenhar a página (evita "piscar" ao trocar de tela).
+    try {
+      var tema = localStorage.getItem('tema');
+      if (tema) document.documentElement.dataset.tema = tema;
+    } catch (e) {}
+  </script>
+</head>
+<body>
+  <header class="topo">
+    <a class="marca" href="{% url 'livro_list' %}">Minha Estante</a>
+    <nav>
+      <a href="{% url 'livro_list' %}">Estante</a>
+      <a href="{% url 'buscar' %}">Buscar livros</a>
+      <a href="{% url 'livro_create' %}">Cadastrar à mão</a>
+      <a href="{% url 'admin:index' %}">Admin</a>
+      <button type="button" class="botao-tema" onclick="alternarTema()" aria-label="Alternar modo claro/escuro">◐</button>
+    </nav>
+  </header>
+
+  <main class="conteudo">
+    {% for mensagem in messages %}
+      <p class="aviso aviso-{{ mensagem.tags }}">{{ mensagem }}</p>
+    {% endfor %}
+
+    {% block conteudo %}{% endblock %}
+  </main>
+
+  <script>
+    // Troca entre claro e escuro e guarda a escolha neste navegador.
+    function alternarTema() {
+      var escuro = document.documentElement.dataset.tema === 'escuro' ||
+        (!document.documentElement.dataset.tema && matchMedia('(prefers-color-scheme: dark)').matches);
+      var novo = escuro ? 'claro' : 'escuro';
+      document.documentElement.dataset.tema = novo;
+      try { localStorage.setItem('tema', novo); } catch (e) {}
+    }
+  </script>
+</body>
+</html>

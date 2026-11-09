@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+
+{% block conteudo %}
+  <section class="resumo">
+    <div><strong>{{ livros|length }}</strong><span>livros na estante</span></div>
+    <div><strong>{{ lidos_no_mes }}</strong><span>lidos este mês</span></div>
+    <div><strong>{{ lidos_no_ano }}</strong><span>lidos este ano</span></div>
+    <div><strong>{% if media_notas is not None %}{{ media_notas|floatformat:1 }}{% else %}–{% endif %}</strong><span>nota média</span></div>
+  </section>
+
+  <h1>Estante</h1>
+
+  {% if livros %}
+    <div class="prateleira">
+      {% for livro in livros %}
+        {% with leitura=livro.leituras.first %}
+          <a class="livro" href="{% url 'livro_detail' livro.pk %}" title="{{ livro.titulo }}">
+            {% if livro.capa_url %}
+              <img src="{{ livro.capa_url }}" alt="Capa de {{ livro.titulo }}" loading="lazy">
+            {% else %}
+              <span class="lombada">{{ livro.titulo }}</span>
+            {% endif %}
+            <span class="etiqueta {% if leitura %}status-{{ leitura.status }}{% endif %}">
+              {% if leitura %}{{ leitura.get_status_display }}{% else %}Sem leitura{% endif %}
+            </span>
+          </a>
+        {% endwith %}
+      {% endfor %}
+    </div>
+  {% else %}
+    <p class="vazio">Nenhum livro na estante ainda.
+      <a href="{% url 'buscar' %}">Busque um livro</a> ou <a href="{% url 'livro_create' %}">cadastre à mão</a>.</p>
+  {% endif %}
+{% endblock %}

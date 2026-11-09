@@ -10,10 +10,16 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/6.1/ref/settings/
 """
 
+import os
 from pathlib import Path
+
+from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Lê o arquivo .env (se existir) e coloca as variáveis dele no ambiente.
+load_dotenv(BASE_DIR / '.env')
 
 
 # Quick-start development settings - unsuitable for production
@@ -55,7 +61,7 @@ ROOT_URLCONF = 'projeto_com_django.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'templates'],  # pasta do base.html compartilhado
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -126,3 +132,8 @@ MAILERS = {
         'BACKEND': 'django.core.mail.backends.console.EmailBackend',
     },
 }
+
+
+# Chave da API do Google Books. Fica no arquivo .env (nunca no Git).
+# Sem chave a busca também funciona, só com uma cota diária menor.
+GOOGLE_BOOKS_API_KEY = os.getenv('GOOGLE_BOOKS_API_KEY', '')

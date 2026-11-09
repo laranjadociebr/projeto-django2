@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+
+{% block titulo %}{{ livro.titulo }} · Minha Estante{% endblock %}
+
+{% block conteudo %}
+  <article class="detalhe">
+    {% if livro.capa_url %}
+      <img class="capa-grande" src="{{ livro.capa_url }}" alt="Capa de {{ livro.titulo }}">
+    {% else %}
+      <span class="lombada lombada-grande">{{ livro.titulo }}</span>
+    {% endif %}
+
+    <div>
+      <h1>{{ livro.titulo }}</h1>
+      <p class="autor">{{ livro.autor|default:"Autor não informado" }}{% if livro.paginas %} · {{ livro.paginas }} páginas{% endif %}</p>
+      {% if livro.sinopse %}<p class="sinopse">{{ livro.sinopse|truncatewords:90 }}</p>{% endif %}
+      <p class="acoes">
+        <a class="botao" href="{% url 'leitura_create' livro.pk %}">Registrar leitura</a>
+        <a class="botao botao-secundario" href="{% url 'livro_update' livro.pk %}">Editar livro</a>
+      </p>
+    </div>
+  </article>
+
+  <h2>Leituras</h2>
+  {% for leitura in livro.leituras.all %}
+    <section class="cartao">
+      <p class="linha">
+        <span class="etiqueta status-{{ leitura.status }}">{{ leitura.get_status_display }}</span>
+        Página {{ leitura.pagina_atual }}{% if livro.paginas %} de {{ livro.paginas }}{% endif %}
+        · lido {{ leitura.vezes_lida }} vez{{ leitura.vezes_lida|pluralize:"es" }}
+        {% if leitura.data_inicio %}· início {{ leitura.data_inicio|date:"d/m/Y" }}{% endif %}
+        {% if leitura.data_termino %}· término {{ leitura.data_termino|date:"d/m/Y" }}{% endif %}
+      </p>
+      {% if livro.paginas %}<progress max="100" value="{{ leitura.progresso }}">{{ leitura.progresso }}%</progress>{% endif %}
+      <p class="acoes">
+        <a href="{% url 'leitura_update' leitura.pk %}">Atualizar leitura</a>
+        <a href="{% url 'resenha_create' leitura.pk %}">Escrever resenha</a>
+      </p>
+
+      {% for resenha in leitura.resenhas.all %}
+        <div class="resenha">
+          <p class="nota">Nota {{ resenha.nota }}/10 <small>{{ resenha.criada_em|date:"d/m/Y" }}</small>
+            <a href="{% url 'resenha_update' resenha.pk %}">editar</a></p>
+          {% if resenha.contexto %}<p><strong>Contexto:</strong> {{ resenha.contexto|linebreaksbr }}</p>{% endif %}
+          {% if resenha.pontos_fortes %}<p><strong>Pontos fortes:</strong> {{ resenha.pontos_fortes|linebreaksbr }}</p>{% endif %}
+          {% if resenha.pontos_fracos %}<p><strong>Pontos fracos:</strong> {{ resenha.pontos_fracos|linebreaksbr }}</p>{% endif %}
+        </div>
+      {% endfor %}
+    </section>
+  {% empty %}
+    <p class="vazio">Nenhuma leitura registrada. Clique em "Registrar leitura" para marcar onde você parou.</p>
+  {% endfor %}
+{% endblock %}
